@@ -1,6 +1,22 @@
 version: 1.0.1
 
 services: 
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: yolo-frontend:V1.0.1
+    ports: 
+      - "3000:3000"
+    stdin_open: true
+    depends_on:
+      - backend
+    networks: 
+      - app-network
+    volumes:
+      - app_data_frontend:/home/node/frontend
+    command: ["npm", "start"]
+
   backend:
     build:
       context: ./backend
@@ -15,8 +31,9 @@ services:
     volumes:
       - app_data:/home/node/app
     command: ["npm", "start"]
-
+  
 volumes:
+  app_data_frontend:
   app_data: # This volume is shared among services
   db_data: # Dedicated volume for MongoDB data
 
