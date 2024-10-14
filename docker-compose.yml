@@ -1,0 +1,25 @@
+version: 1.0.1
+
+services: 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: yolo-backend:V1.0.1 # Optional: Define an image name if needed
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: 'mongodb+srv://jameskimani2:4sy1NOu3iosx0IxS@devops-class-cluster.9kz3c.mongodb.net/?retryWrites=true&w=majority&appName=devops-class-cluster'
+    networks:
+      - app-network
+    volumes:
+      - app_data:/home/node/app
+    command: ["npm", "start"]
+
+volumes:
+  app_data: # This volume is shared among services
+  db_data: # Dedicated volume for MongoDB data
+
+networks:
+  app-network:
+    driver: bridge
