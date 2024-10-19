@@ -1,29 +1,30 @@
-#Base image is the alpine varient of the official nodejs image. 
-#Alpine is used because it is lightweight leading to a small final image
-FROM node:20.18.0-alpine
+# build environment
+FROM node:20.18.0-alpine as build
+WORKDIR /app
 
-#Base image comes with non-root user "node".
-#app and app/node_modules directory created and ownership assiged to the node user
-RUN mkdir -p /home/node/frontend/node_modules && chown -R node:node /home/node/frontend
+#add node_modules folder to $PATH variable
+ENV PATH /app/node_modules/.bin:$PATH
 
-#set the app directory in the node user home dir as the working directory
-WORKDIR /home/node/frontend
+# Copy the package.json and package-lock.json files to the image
+COPY package*.json ./
 
-# Copy the package.json and package-lock.json files to the container & Assign node user ownership
-COPY --chown=node:node package*.json ./
-
-#Non root user "node" used as security best practice
-USER node
-
-#install frontend production dependancies
+#install frontend  dependancies
 RUN npm install
 
+#fix error: https://stackoverflow.com/questions/52196518/could-not-get-uid-gid-when-building-node-docker
+#RUN npm config set unsafe-perm true 
 
-#copy application code with the appropriate permissions into the container's app directory
-COPY --chown=node:node . .
+#RUN npm install react-scripts@3.4.1 -g --silent
 
-# Expose the port the app runs on
-EXPOSE 3000
+#copy application code into image
+COPY . /app
 
-# Define the command to run the app
-CMD [ "npm", "start" ]
+#build production app
+RUN npm run build
+
+#STAGE 2: production environment
+FROM nginx:1.16.0-alpine
+#copy built application to the prod. image and into nginx public web root folder
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
