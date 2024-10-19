@@ -7,34 +7,59 @@ services:
       dockerfile: Dockerfile
     image: yolo-frontend:V1.0.1
     ports: 
-      - "3000:3000"
+      - "3000:80"
+    env_file: .env
     stdin_open: true
+    tty: true
     depends_on:
       - backend
     networks: 
       - app-network
     volumes:
-      - app_data_frontend:/home/node/frontend
-    command: ["npm", "start"]
+      - app_data:/home/node/frontend
+    command: ["nginx", "-g", "daemon off;"]
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: yolo-backend:V1.0.1 # Optional: Define an image name if needed
+    image: yolo-backend:V1.0.1 
+    restart: unless-stopped
     ports:
       - "5000:5000"
+    depends_on:
+      - mongo
+    env_file: .env
+    stdin_open: true
+    tty: true
     environment:
-      MONGODB_URI: 'mongodb+srv://jameskimani2:4sy1NOu3iosx0IxS@devops-class-cluster.9kz3c.mongodb.net/?retryWrites=true&w=majority&appName=devops-class-cluster'
+      MONGODB_URI: 'mongodb://root:pass@mongo:27017/yolodb?authSource=admin'
     networks:
       - app-network
     volumes:
       - app_data:/home/node/app
     command: ["npm", "start"]
+
+  mongo:
+    image: mongo:8.0.1-noble
+    container_name: yolo-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    env_file: .env
+    command: mongod --auth
+    environment:
+      - MONGO_INITDB_DATABASE=yolodb
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    volumes:  
+      - db_data:/data/db  
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro 
+    networks:
+      - app-network
   
 volumes:
-  app_data_frontend:
-  app_data: # This volume is shared among services
+  app_data: # shared volume for both backend and frontend 
   db_data: # Dedicated volume for MongoDB data
 
 networks:
