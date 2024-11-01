@@ -1,0 +1,33 @@
+---
+- name: Pull MongoDb image
+  docker_image:
+    source: pull
+    name: '{{ mongodb_docker_image }}'
+    tag: '{{ mongodb_docker_image_tag }}'
+
+- name: Create a volume for persistent db data storage 
+  docker_volume:
+    name: '{{ mongodb_data_volume }}'
+
+- name: Run mongodb container
+  docker_container:
+    name: '{{ mongodb_container_name }}'
+    image: '{{ mongodb_docker_image }}:{{ mongodb_docker_image_tag }}'
+    restart_policy: always
+    state: started
+    memory: '{{ container_memory_limit | default(omit) }}'
+    env: 
+     MONGO_INITDB_DATABASE: '{{ mongodb_db | mandatory }}'
+     MONGO_INITDB_ROOT_USERNAME: '{{ mongodb_admin_user | mandatory }}'
+     MONGO_INITDB_ROOT_PASSWORD: '{{ mongodb_admin_password | mandatory }}'
+    #volumes: '{{ mongodb_volumes + [mongodb_users_config_mount] }}'
+    volumes: 
+     - '{{mongodb_data_volume}}:/data/db'
+    ports:
+     - '{{ mongodb_port }}:{{ mongodb_internal_port }}'
+  register: mongodb_container
+
+- name: Wait until mongodb starts up
+  wait_for:
+    port: '{{ mongodb_port }}'
+    delay: 5
