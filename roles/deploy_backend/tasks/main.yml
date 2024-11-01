@@ -1,0 +1,31 @@
+---
+
+- name: Build backend image from dockerfile
+  community.docker.docker_image:
+    name: '{{backend_docker_image}}:{{backend_docker_image_tag}}'
+    build:
+      # 'backend.vm.synced_folder' directive on Vagrantfile copies backend files, including Dockerfile, to this folder
+      path: '{{ path_to_backend_app }}'
+    source: build
+
+- name: Create a volume for persisting backend data  
+  docker_volume:
+    name: '{{ yolo_data_volume }}'
+
+- name: Run backend container
+  docker_container:
+    name: '{{ backend_container_name }}'
+    image: '{{ backend_docker_image }}:{{ backend_docker_image_tag }}'
+    interactive: true
+    tty: true
+    restart_policy: always
+    state: started
+    env: 
+     MONGODB_URI: '{{ mongodb_uri }}'
+    volumes: 
+     - '{{ yolo_data_volume }}:/home/node/app'
+    ports:
+     - '{{ backend_port }}:{{ backend_internal_port }}'
+    command: ["npm", "start"]
+  register: backend_container
+

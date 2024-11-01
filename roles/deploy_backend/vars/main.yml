@@ -1,0 +1,14 @@
+---
+
+yolo_data_volume: yolo_app_data
+backend_docker_image: yolo-backend
+backend_docker_image_tag: V1.0.1
+
+backend_container_name: 'yolo-backend'
+backend_port: 5000
+backend_internal_port: 5000
+
+mongodb_uri: 'mongodb://root:pass@localhost:27017/yolodb?authSource=admin'
+
+path_to_backend_app: /backend_app
+
