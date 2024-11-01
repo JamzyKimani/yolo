@@ -5,3 +5,8 @@
   roles:
    - setup_docker
   
+- hosts: "db"
+  become: true
+  roles:
+   - setup_mongodb_container
+  
