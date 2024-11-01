@@ -1,0 +1,37 @@
+---
+
+mongodb_container_name: 'yolo-mongodb'
+mongodb_port: 27017
+mongodb_internal_port: 27017
+
+# Admin credentials
+mongodb_admin_user: root
+mongodb_admin_password: pass
+
+# User database
+mongodb_db: yolodb
+
+# User credentials
+mongodb_user: root
+mongodb_password: pass
+
+# Mongo version
+mongodb_docker_image: mongo
+mongodb_docker_image_tag: 8.0.1-noble
+
+# Install mongo cli on docker host
+mongodb_install_cli: false
+
+# Environment variables to be set for container
+mongodb_env: {}
+# Volumes to be mapped for mongo
+mongodb_volumes: []
+
+mongodb_data_volume: yolo_db_data
+
+
+# Momory limit for container
+mongodb_container_memory_limit: 256m
+
+# Path to store config files on server
+mongodb_settings_path: '{{ ansible_user_dir }}/{{ mongodb_container_name }}'
