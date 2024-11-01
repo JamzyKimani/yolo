@@ -9,4 +9,9 @@
   become: true
   roles:
    - setup_mongodb_container
+
+- hosts: "api"
+  become: true
+  roles:
+   - deploy_backend
   

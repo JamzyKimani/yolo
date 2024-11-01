@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
     # ./.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
     #
     # the file looks like:
-
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     #   backend ansible_host=172.29.64.1 ansible_port=2201 ansible_user='vagrant' ansible_ssh_private_key_file='/mnt/c/Users/James Kimani/.vagrant.d/insecure_private_key'
     #   frontend ansible_host=172.29.64.1 ansible_port=2202 ansible_user='vagrant' ansible_ssh_private_key_file='/mnt/c/Users/James Kimani/.vagrant.d/insecure_private_key'
     #   mongo ansible_host=172.29.64.1 ansible_port=2222 ansible_user='vagrant' ansible_ssh_private_key_file='/mnt/c/Users/James Kimani/.vagrant.d/insecure_private_key'
@@ -55,7 +55,7 @@ Vagrant.configure("2") do |config|
     #   
     #   [db]
     #   mongo
-    
+    #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     ##
     ansible.groups = {
       "frontend" => ["frontend"],
