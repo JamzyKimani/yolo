@@ -1,0 +1,12 @@
+---
+
+yolo_data_volume: yolo_app_data
+frontend_docker_image: yolo-frontend
+frontend_docker_image_tag: V1.0.1
+
+frontend_container_name: 'yolo-frontend'
+frontend_port: 3000
+frontend_internal_port: 80
+
+path_to_frontend_app: /client_app
+

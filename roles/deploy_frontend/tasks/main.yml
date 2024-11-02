@@ -1,0 +1,29 @@
+---
+
+- name: Build frontend image from dockerfile
+  community.docker.docker_image:
+    name: '{{frontend_docker_image}}:{{frontend_docker_image_tag}}'
+    build:
+      # 'frontend.vm.synced_folder' directive on Vagrantfile copies frontend files, including Dockerfile, to this folder
+      path: '{{ path_to_frontend_app }}'
+    source: build
+
+- name: Create a volume for persisting frontend data  
+  docker_volume:
+    name: '{{ yolo_data_volume }}'
+
+- name: Run frontend container
+  docker_container:
+    name: '{{ frontend_container_name }}'
+    image: '{{ frontend_docker_image }}:{{ frontend_docker_image_tag }}'
+    interactive: true
+    tty: true
+    restart_policy: always
+    state: started
+    volumes: 
+     - '{{ yolo_data_volume }}:/home/node/frontend'
+    ports:
+     - '{{ frontend_port }}:{{ frontend_internal_port }}'
+    command: ["nginx", "-g", "daemon off;"]
+  register: frontend_container
+

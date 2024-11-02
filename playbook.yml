@@ -14,4 +14,9 @@
   become: true
   roles:
    - deploy_backend
+
+- hosts: "client"
+  become: true
+  roles:
+   - deploy_frontend
   
