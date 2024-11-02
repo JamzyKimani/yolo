@@ -9,13 +9,9 @@ const productRoute = require('./routes/api/productRoute');
 // Connecting to the Database
 let mongodb_url = 'mongodb://root:pass@192.168.56.10:27017/yolodb?authSource=admin';
 let dbName = 'yolodb';
-//let mongodb_url = 'mongodb+srv://jameskimani2:4sy1NOu3iosx0IxS@devops-class-cluster.9kz3c.mongodb.net/?retryWrites=true&w=majority&appName=devops-class-cluster';
-//let dbName = 'devops-class-cluster';
-
-
 
 // define a url to connect to the database
-const MONGODB_URI = process.env.MONGODB_URI || mongodb_url + dbName
+const MONGODB_URI = process.env.MONGODB_URI || mongodb_url
 console.log(MONGODB_URI);
 mongoose.connect(MONGODB_URI,{useNewUrlParser: true, useUnifiedTopology: true  } )
 let db = mongoose.connection;

@@ -22,6 +22,7 @@
     state: started
     env: 
      MONGODB_URI: '{{ mongodb_uri }}'
+     PORT: '{{backend_internal_port}}'
     volumes: 
      - '{{ yolo_data_volume }}:/home/node/app'
     ports:

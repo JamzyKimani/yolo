@@ -8,7 +8,7 @@ backend_container_name: 'yolo-backend'
 backend_port: 5000
 backend_internal_port: 5000
 
-mongodb_uri: 'mongodb://root:pass@localhost:27017/yolodb?authSource=admin'
+mongodb_uri: 'mongodb://root:pass@172.29.64.1:27017/yolodb?authSource=admin'
 
 path_to_backend_app: /backend_app
 
