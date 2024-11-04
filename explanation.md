@@ -1,3 +1,4 @@
+# EXPLANATION 1: DOCKER DEPLOYMENT
 ## 1. Choice of Base Image
  **Client/Front-End Base Image Choice**
  The client image created by a multi-stage build dockerfile that uses two base images:
@@ -175,3 +176,88 @@ Below are the screenshots of the two images deployed to Dockerhub (backend and c
 
 **backend Image on Dockerhub**
 ![backend image on dockerhub](./yolo-backend.png "Client/Front-End Image on DockerHub")
+
+<br>
+
+# EXPLANATION 2: VAGRANT + ANSIBLE DEPLOYMENT
+## Provisioning Virtual Machines with Vagrant
+The `Vagrantfile` is used to define configurations that will create the virtual machines.  
+
+```
+config.vm.define "frontend" do |frontend|
+    frontend.vm.hostname = "frontend"
+    frontend.vm.network "private_network", ip: "192.168.56.12"
+    frontend.vm.network "forwarded_port", guest: 3000, host: 3000
+    frontend.vm.network "forwarded_port", guest: 22, host: 2220
+    frontend.vm.synced_folder "./client", "/client_app"
+  end
+```
+The Vagrantfile snippet above shows how the frontend virtual machine is defined. It assigns a private network IP to the VM to allow it to communicate with the other virtual machines. 
+
+It also defines which port on the virtual machine will be mapped to a port on the host machine. In this case ports 22 (ssh port) and 3000 (application server port) on the frontend VM are mapped to ports 3000 and 2220 on the host to allow the application to be available on the host machine, and SSH access from the host machine.
+
+It also defines how the `client` folder on the host machine will be mirrored to the `/client_app` folder in the virtual machine. The `client` folder contains a Dockerfile which will be used to create a docker image and subsequently a docker container that will serve the frontend application on the VM.
+
+## Configuring VMs and Installing Dependancies with Ansible
+It also has *Ansible* as the provisioner, and therefore Ansible is invoked after the virtual machines are created (see below):
+
+```
+config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbook.yml"
+    ansible.verbose = true
+    
+    ansible.groups = {
+      "client" => ["frontend"],
+      "api"  => ["backend"],
+      "db"  => ["mongo"]
+    }
+  end
+```
+The snippet above shows how to define the ansible playbook and how the ansible inventory file is defined for creation by Vagrant. The `ansible.groups` directive automatically creates an ansible inventory file in the following dir:
+    `./.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory`
+<br>
+
+The generated inventory file let's ansible know which instructions to run on which VM/group of VMs. The generated Inventory file looks like:
+
+```
+backend ansible_host=172.29.64.1 ansible_port=2201 ansible_user='vagrant' ansible_ssh_private_key_file='/mnt/c/Users/James Kimani/.vagrant.d/insecure_private_key'
+frontend ansible_host=172.29.64.1 ansible_port=2202 ansible_user='vagrant' ansible_ssh_private_key_file='/mnt/c/Users/James Kimani/.vagrant.d/insecure_private_key'
+mongo ansible_host=172.29.64.1 ansible_port=2222 ansible_user='vagrant' ansible_ssh_private_key_file='/mnt/c/Users/James Kimani/.vagrant.d/insecure_private_key'
+
+[client]
+frontend
+
+[api]
+backend
+
+[db]
+mongo
+```
+## Running Ansible Playbooks & Defining Roles
+Ansible defines configuration instructions in a playbook file. Each instruction or "play" is abstracted out of the playbook file into "roles" which define a single outcome and all the configurations variables required for that outcome. 
+
+```
+---
+
+- hosts: "all"
+  become: true
+  roles:
+   - setup_docker
+  
+- hosts: "db"
+  become: true
+  roles:
+   - setup_mongodb_container
+
+- hosts: "api"
+  become: true
+  roles:
+   - deploy_backend
+
+- hosts: "client"
+  become: true
+  roles:
+   - deploy_frontend
+```
+
+The above playbook shows the order of excecution of the roles. They are ordered in a logical order where a play is dependant of the plays that come before it i.e. creating and setting up the database container is dependant on having docker installed on the virtual machine. In the same way, deploying the backend is dependant on the backend application having a database connection and the frontend requires a backend to provide data to hydrate the frontend app.
