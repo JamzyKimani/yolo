@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: yolo-configs
+data:
+  db_name: yolodb
+  
